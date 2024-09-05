@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanctions Management System</title>
+    <!-- Include Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Include Tailwind CSS via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .dropdown-menu {
+            display: none;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <nav class="flex items-center justify-between flex-wrap bg-gray-800 p-6">
+        <div class="flex items-center flex-shrink-0 text-white mr-6">
+            <a href="/" class="text-white">
+                <i class="fas fa-home text-xl"></i>
+            </a>
+        </div>
+        <div class="block lg:hidden">
+            <button class="flex items-center px-3 py-2 border rounded text-white border-white-400 hover:text-white hover:border-white">
+                <svg class="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <title>Menu</title>
+                    <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
+                </svg>
+            </button>
+        </div>
+        <div class="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
+            {% if request.user.is_authenticated %}
+            <div class="text-md lg:flex-grow">
+                <a href="{% url 'transactions:upload' %}" class="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-white mr-4">
+                    Performance Results
+                </a>
+                <a href="{% url 'transactions:generate_test_data' %}" class="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-white mr-4">
+                    Generate Test Data
+                </a>
+                <div class="relative inline-block text-left dropdown">
+                    <button id="dropdown-button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-800 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                        Watch List Manager
+                        <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.293 9.293a1 1 0 011.414 0L10 12.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <div id="dropdown-menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none dropdown-menu" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                        <div class="py-1" role="none">
+
+                            <a href="{% url 'transactions:records_variations' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">Records & Variations</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'accounts:user_logout' %}" class="inline-block font-medium text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-800 hover:bg-white mt-4 lg:mt-0">Logout</a>
+            </div>
+            {% else %}
+            <div class="text-md lg:flex-grow"></div>
+            <div>
+                <a href="{% url 'accounts:user_login' %}" class="mr-2 inline-block font-medium text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-800 hover:bg-white mt-4 lg:mt-0">Login</a>
+            </div>
+            <div>
+                <a href="{% url 'accounts:user_registration' %}" class="inline-block font-medium text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-800 hover:bg-white mt-4 lg:mt-0">Register</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownButton = document.getElementById('dropdown-button');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+
+            dropdownButton.addEventListener('click', function() {
+                dropdownMenu.classList.toggle('show');
+            });
+
+            document.addEventListener('click', function(event) {
+                if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
+
+<title>Upload XML File</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+        /* Light gray background */
+    }
+    
+    .container {
+        max-width: 900px;
+        /* Increased container width */
+        margin: 20px auto;
+        /* Centered container */
+        padding: 20px;
+        background-color: #ffffff;
+        /* White background for container */
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 2px 2px 12px #aaa;
+    }
+    
+    h2,
+    h3 {
+        color: #333;
+        text-align: center;
+        /* Centered headings */
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+        text-align: center;
+        /* Centered form-group */
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .form-group input[type="file"] {
+        width: 100%;
+        max-width: 300px;
+        /* Restrict input width */
+        margin: 0 auto;
+        /* Center the input */
+    }
+    
+    .btn-group {
+        margin-top: 20px;
+        text-align: center;
+        /* Centered button group */
+    }
+    
+    .btn-group button {
+        padding: 10px 20px;
+        font-size: 16px;
+        margin-right: 10px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        color: #ffffff;
+        /* White text for buttons */
+        background-color: #000000;
+        /* Black background */
+    }
+    
+    .btn-group button:hover {
+        opacity: 0.8;
+    }
+    
+    .message {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #28a745;
+        /* Green color for messages */
+        text-align: center;
+        /* Centered message */
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    
+    table,
+    th,
+    td {
+        border: 1px solid #ccc;
+    }
+    
+    th,
+    td {
+        padding: 12px;
+        text-align: left;
+    }
+    
+    th {
+        background-color: #e0e0e0;
+        /* Light gray for header */
+        color: #333;
+    }
+    
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+        /* Slightly different gray for alternate rows */
+    }
+    
+    @media (max-width: 768px) {
+        .container {
+            width: 95%;
+            /* Responsive container width */
+        }
+    }
+</style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Upload XML File</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="xmlFile">Select XML file:</label>
+                <input type="file" id="xmlFile" name="xml_file" accept=".xml" required>
+            </div>
+            <div class="btn-group">
+                <button type="submit" name="process_ofac" class="btn btn-primary">Process OFAC</button>
+                <button type="submit" name="process_eu" class="btn btn-primary">Process EU</button>
+                <button type="submit" name="process_un" class="btn btn-primary">Process UN</button>
+            </div>
+        </form>
+
+        {% if message %}
+        <div class="alert alert-info mt-3">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        <h3 class="mt-5">Upload Statistics</h3>
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>List Name</th>
+                    <th>Dataset ID</th>
+                    <!-- Added column for Dataset ID -->
+                    <th>Last Import Date</th>
+                    <th>Records Added</th>
+                    <th>Records Updated</th>
+                    <th>Records Deleted</th>
+                    <th>Total Active Records</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in statistics %}
+                <tr>
+                    <td>{{ stat.list_name }}</td>
+                    <td>{{ stat.dataset_id }}</td>
+                    <!-- Display Dataset ID -->
+                    <td>{{ stat.last_import_date }}</td>
+                    <td>{{ stat.records_added }}</td>
+                    <td>{{ stat.records_updated }}</td>
+                    <td>{{ stat.records_deleted }}</td>
+                    <td>{{ stat.total_active_records }}</td>
+                    <td>{{ stat.start_time }}</td>
+                    <td>{{ stat.end_time }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+<div>
+    {% for message in notifications %}
+    <div class="notification">
+        <p>{{ message }}</p>
+    </div>
+    {% endfor %}
+</div>
+
+</html>
