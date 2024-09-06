@@ -26,5 +26,6 @@ urlpatterns = [
     path(
         'transactions/',
         include('transactions.urls', namespace='transactions')
+        path('social/', include('social_django.urls', namespace='social')),
     )
 ]
